@@ -17,21 +17,87 @@ import random
 getLogger().setLevel(DEBUG)
 
 
-def returnzero(plateau, new_plateau, player):
+# plateau = Figures()
+# plateau.height = 10
+# plateau.width = 100
+# print(plateau.width, plateau.height)
+# fig = Figures()
+# fig.height = 12
+# fig.width = 123
+# print(fig.width, fig.height)
+
+# def check_moves(platea, figur, player):
+#     plateau = []
+#     for i in platea:
+#         plateau.append([m for m in i])
+#     figure = []
+#     for i in figur:
+#         figure.append([m for m in i])
+#     debug(plateau)
+#     for i in range(len(plateau)):
+#         for j in range(len(plateau[0])):
+#             for f in range(len(figure)):
+#                 for m in range(len(figure[f])):
+#                     if figure[m] == '*':
+# def givezero(plateau, new_plateau, player):
+#     elem = ("O" if player == 1 else "X")
+#     for i in range(len(plateau)):
+#         for j in range(len(plateau[0])):
+#             if plateau[i][j] == elem:
+#                 if new_plateau[i][j] == '.':
+#                     new_plateau[i] = new_plateau[i][:j] + elem + new_plateau[i][j+1:]
+#     return new_plateau
+#
+# # print(givezero(['   01234567890123456,', '000 .................','001 .................', '002 .................','003 .................','004 .................','005 .................','006 .................','007 ..O..............','008 ..OOO............','009 .................','010 .................','011 .................','012 ..............X..','013 .................','014 .................]'], ['   01234567890123456,', '000 .................','001 .................', '002 .................','003 .................','004 .................','005 .................','006 .................','007 .*.*.............','008 ..OOO............','009 .................','010 .................','011 .................','012 ..............X..','013 .................','014 .................]'], 1))
+#
+#
+# def check_available_moves(plateau: list, figure: list, player: int, heigth: int, width: int):
+#     oldfigs = 0
+#     opp_count = 0
+#     my_count = 0
+#
+#     for i in plateau:
+#         oldfigs += i.count('.')
+#         opp_count += i.count("O" if player == 2 else "X")
+#         my_count += i.count("O" if player == 1 else "X")
+#     figc = 0
+#     for i in figure:
+#         figc += i.count('*')
+#     possible = []
+#     for i in range(1, heigth + 1):
+#         for j in range(3, len(plateau[1]) - len(figure) + 1):
+#             newplateau = plateau.copy()
+#             for f in range(len(figure)):
+#                 if i + len(figure) <= len(plateau) - 1:
+#                     newplateau[i+f] = newplateau[i+f][:j] + figure[f] + newplateau[i+f][j + len(figure[f]):]
+#                 # print(newplateau)
+#                 newplateau = givezero(plateau, newplateau, player)
+#                 new_opp_count = 0
+#                 new_my_count = 0
+#                 for fig in newplateau:
+#                     new_opp_count += fig.count("O" if player == 2 else "X")
+#                     new_my_count += fig.count("O" if player == 1 else "X")
+#                 if new_opp_count == opp_count and new_my_count == my_count - 1:
+#                     # print(plateau)
+#                     # print(newplateau, j-4, i-1)
+#                     if i - 1 <= len(plateau) - len(figure) - 2:
+#                         if j - 4 >= 0:
+#                             debug(newplateau)
+#                             possible.append(tuple((i - 1, j - 4)))
+#     return possible
+
+def givezero(plateau, new_plateau, player):
     elem = ("O" if player == 1 else "X")
     opp_elem = ("O" if player == 2 else "X")
     for i in range(len(plateau)):
         for j in range(len(plateau[0])):
             if plateau[i][j] == elem:
                 if new_plateau[i][j] == '@':
-                    new_plateau[i] = new_plateau[i][:j] + \
-                        elem + new_plateau[i][j+1:]
+                    new_plateau[i] = new_plateau[i][:j] + elem + new_plateau[i][j+1:]
             elif plateau[i][j] == opp_elem:
                 if new_plateau[i][j] == '@':
-                    new_plateau[i] = new_plateau[i][:j] + \
-                        opp_elem + new_plateau[i][j + 1:]
+                    new_plateau[i] = new_plateau[i][:j] + opp_elem + new_plateau[i][j + 1:]
     return new_plateau
-
 
 def check_available_moves(plateau: list, figure: list, player: int, heigth: int, width: int):
     # debug(plateau)
@@ -54,10 +120,9 @@ def check_available_moves(plateau: list, figure: list, player: int, heigth: int,
             newplateau = plateau.copy()
             for f in range(len(figure)):
                 if i + f <= len(plateau) - 1:
-                    newplateau[i+f] = newplateau[i+f][:j] + \
-                        figure[f] + newplateau[i+f][j + len(figure[f]):]
+                    newplateau[i+f] = newplateau[i+f][:j] + figure[f] + newplateau[i+f][j + len(figure[f]):]
                 # print(newplateau)
-            newplateau = returnzero(plateau, newplateau, player)
+            newplateau = givezero(plateau, newplateau, player)
             newfigs = 0
             new_opp_count = 0
             new_my_count = 0
@@ -68,7 +133,7 @@ def check_available_moves(plateau: list, figure: list, player: int, heigth: int,
             if new_opp_count == opp_count and new_my_count == my_count - 1:
                 # debug(newplateau)
                 possible.append(tuple((i - 1, j - 4)))
-    return possible
+    return possible, new_my_count
 
 # print(check_available_moves(['   01234567890123456,', '000 .................','001 .................', '002 .................','003 .................','004 .................','005 .................','006 .................','007 ..O..............','008 ..OOO............','009 .................','010 .................','011 .................','012 ..............X..','013 .................','014 .................]'], ['..*.','***.'],1, 15, 17))
 # print(check_available_moves(['    0123456789012345678901234567890123456789', '000 ........................................', '001 ........................................', '002 ........................................', '003 ...O....................................', '004 ........................................', '005 ........................................', '006 ........................................', '007 ........................................', '008 ........................................', '009 ........................................', '010 ........................................', '011 ........................................', '012 ........................................', '013 ........................................', '014 ........................................', '015 ........................................', '016 ........................................', '017 ........................................', '018 ........................................', '019 ...............................XX.......', '020 ...............................X........', '021 ........................................', '022 ........................................', '023 ........................................'], ['.*..', '....', '....'], 2, 23, 40))
@@ -90,6 +155,8 @@ def parse_field_info():
     height = info.split()[-2]
     debug(f"Description of the field: {info}")
     return height, width
+
+
 
 
 def parse_field(player: int, height, width):
@@ -184,13 +251,28 @@ def step(player: int):
     height, width = parse_field_info()
     plateau = parse_field(player, int(height), int(width))
     figure = parse_figure()
-    available_moves = check_available_moves(
-        plateau, figure, player, int(height), int(width))
+    available_moves, count = check_available_moves(plateau, figure, player, int(height), int(width))
     debug(available_moves)
     # best_move = find_distance(plateau, figure, available_moves)
     if len(available_moves) == 0:
         print(1, 1)
-    best_move = random.choice(available_moves)
+        quit()
+    # elif len(available_moves) >= 2:
+    #     best_move = (available_moves[-(len(available_moves) - 3)])
+    # else:
+    #     best_move = available_moves[-1]
+    # best_move = random.choice(available_moves)
+    # best_move = available_moves[len(available_moves) // 2]
+    if player == 1:
+        if count > 80:
+            best_move = available_moves[0]
+        else:
+            best_move = available_moves[-1]
+    else:
+        if count > 80:
+            best_move = available_moves[-1]
+        else:
+            best_move = available_moves[0]
     debug(best_move)
     return best_move
 
