@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from strategies.random import strategy
 """
     This is an example of a bot for the 3rd project.
     ...a pretty bad bot to be honest -_-
 """
 import sys
-from logging import DEBUG, debug, getLogger
+from logging import ERROR, debug, getLogger
 
 
-getLogger().setLevel(DEBUG)
+getLogger().setLevel(ERROR)
 
 
 def givezero(plateau, new_plateau, player):
@@ -25,10 +26,12 @@ def givezero(plateau, new_plateau, player):
         for j in range(len(plateau[0])):
             if plateau[i][j] == elem:
                 if new_plateau[i][j] == '.':
-                    new_plateau[i] = new_plateau[i][:j] + elem + new_plateau[i][j+1:]
+                    new_plateau[i] = new_plateau[i][:j] + \
+                        elem + new_plateau[i][j+1:]
             elif plateau[i][j] == opp_elem:
                 if new_plateau[i][j] == '.':
-                    new_plateau[i] = new_plateau[i][:j] + opp_elem + new_plateau[i][j + 1:]
+                    new_plateau[i] = new_plateau[i][:j] + \
+                        opp_elem + new_plateau[i][j + 1:]
     return new_plateau
 
 
@@ -87,22 +90,41 @@ def check_available_moves(plateau: list, figure: list, player: int, heigth: int,
         opp_count += plateau[i].count("O" if player == 2 else "X")
         my_count += plateau[i].count("O" if player == 1 else "X")
     possible = []
+
     for i in range(1, heigth + 1 - len(figure)):
         for j in range(4, len(plateau[1]) - len(figure[0])):
-            newplateau = plateau.copy()
-            for f in range(len(figure)):
-                if i + f <= len(plateau) - 1:
-                    newplateau[i+f] = newplateau[i+f][:j] + figure[f] + newplateau[i+f][j + len(figure[f]):]
-            # print(newplateau)
-            newplateau = givezero(plateau, newplateau, player)
-            new_opp_count = 0
-            new_my_count = 0
-            for fig in newplateau:
-                new_opp_count += fig.count("O" if player == 2 else "X")
-                new_my_count += fig.count("O" if player == 1 else "X")
-            if new_opp_count == opp_count and new_my_count == my_count - 1:
+            total_O = 0
+            total_X = 0
+            for fi, line in enumerate(figure):
+                for fj, char in enumerate(line):
+                    if plateau[i + fi][j + fj] == 'X' and char == '*':
+                        total_X += 1
+                    if plateau[i + fi][j + fj] == 'O' and char == '*':
+                        total_O += 1
+            good = False
+            if player == 1:
+                if total_O == 1 and total_X == 0:
+                    good = True
+            if player == 2:
+                if total_O == 0 and total_X == 1:
+                    good = True
+
+            # newplateau = plateau.copy()
+            # for f in range(len(figure)):
+            #     newplateau[i+f] = newplateau[i+f][:j] + \
+            #         figure[f] + newplateau[i+f][j + len(figure[f]):]
+            # # print(newplateau)
+            # # newplateau = givezero(plateau, newplateau, player)
+            # new_opp_count = 0
+            # new_my_count = 0
+            # for fig in newplateau:
+            #     new_opp_count += fig.count("O" if player == 2 else "X")
+            #     new_my_count += fig.count("O" if player == 1 else "X")
+
+            # if new_opp_count == opp_count and new_my_count == my_count - 1:
+            if good:
                 # debug(newplateau)
-                distance = dominance(newplateau, player, i-1, j-4)
+                distance = dominance(plateau, player, i-1, j-4)
                 possible.append(tuple(((i - 1, j - 4), distance)))
     return possible
 
@@ -220,17 +242,12 @@ def step(player: int):
     height, width = parse_field_info()
     plateau = parse_field(player, int(height), int(width))
     figure = parse_figure()
-    available_moves = check_available_moves(plateau, figure, player, int(height), int(width))
+    available_moves = check_available_moves(
+        plateau, figure, player, int(height), int(width))
     debug(available_moves)
-    if len(available_moves) == 0:
-        sys.exit()
-    if ceiling(plateau, player):
-        best_move = available_moves[0][0]
-    elif floor(plateau, player):
-        best_move = available_moves[-1][0]
-    else:
-        available_moves.sort(key=lambda x: x[1])
-        best_move = available_moves[0][0]
+
+    best_move = strategy(available_moves, plateau)
+
     return best_move
 
 
