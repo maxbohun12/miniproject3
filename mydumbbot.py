@@ -4,116 +4,88 @@
     This is an example of a bot for the 3rd project.
     ...a pretty bad bot to be honest -_-
 """
-
+import sys
 from logging import DEBUG, debug, getLogger
-import random
-# We use the debugger to print messages to stderr
-# You cannot use print as you usually do, the vm would intercept it
-# You can however do the following:
-#
-# import sys
-# print("HEHEY", file=sys.stderr)
+
 
 getLogger().setLevel(DEBUG)
 
 
-# plateau = Figures()
-# plateau.height = 10
-# plateau.width = 100
-# print(plateau.width, plateau.height)
-# fig = Figures()
-# fig.height = 12
-# fig.width = 123
-# print(fig.width, fig.height)
-
-# def check_moves(platea, figur, player):
-#     plateau = []
-#     for i in platea:
-#         plateau.append([m for m in i])
-#     figure = []
-#     for i in figur:
-#         figure.append([m for m in i])
-#     debug(plateau)
-#     for i in range(len(plateau)):
-#         for j in range(len(plateau[0])):
-#             for f in range(len(figure)):
-#                 for m in range(len(figure[f])):
-#                     if figure[m] == '*':
-# def givezero(plateau, new_plateau, player):
-#     elem = ("O" if player == 1 else "X")
-#     for i in range(len(plateau)):
-#         for j in range(len(plateau[0])):
-#             if plateau[i][j] == elem:
-#                 if new_plateau[i][j] == '.':
-#                     new_plateau[i] = new_plateau[i][:j] + elem + new_plateau[i][j+1:]
-#     return new_plateau
-#
-# # print(givezero(['   01234567890123456,', '000 .................','001 .................', '002 .................','003 .................','004 .................','005 .................','006 .................','007 ..O..............','008 ..OOO............','009 .................','010 .................','011 .................','012 ..............X..','013 .................','014 .................]'], ['   01234567890123456,', '000 .................','001 .................', '002 .................','003 .................','004 .................','005 .................','006 .................','007 .*.*.............','008 ..OOO............','009 .................','010 .................','011 .................','012 ..............X..','013 .................','014 .................]'], 1))
-#
-#
-# def check_available_moves(plateau: list, figure: list, player: int, heigth: int, width: int):
-#     oldfigs = 0
-#     opp_count = 0
-#     my_count = 0
-#
-#     for i in plateau:
-#         oldfigs += i.count('.')
-#         opp_count += i.count("O" if player == 2 else "X")
-#         my_count += i.count("O" if player == 1 else "X")
-#     figc = 0
-#     for i in figure:
-#         figc += i.count('*')
-#     possible = []
-#     for i in range(1, heigth + 1):
-#         for j in range(3, len(plateau[1]) - len(figure) + 1):
-#             newplateau = plateau.copy()
-#             for f in range(len(figure)):
-#                 if i + len(figure) <= len(plateau) - 1:
-#                     newplateau[i+f] = newplateau[i+f][:j] + figure[f] + newplateau[i+f][j + len(figure[f]):]
-#                 # print(newplateau)
-#                 newplateau = givezero(plateau, newplateau, player)
-#                 new_opp_count = 0
-#                 new_my_count = 0
-#                 for fig in newplateau:
-#                     new_opp_count += fig.count("O" if player == 2 else "X")
-#                     new_my_count += fig.count("O" if player == 1 else "X")
-#                 if new_opp_count == opp_count and new_my_count == my_count - 1:
-#                     # print(plateau)
-#                     # print(newplateau, j-4, i-1)
-#                     if i - 1 <= len(plateau) - len(figure) - 2:
-#                         if j - 4 >= 0:
-#                             debug(newplateau)
-#                             possible.append(tuple((i - 1, j - 4)))
-#     return possible
-
 def givezero(plateau, new_plateau, player):
+    """
+    Places back the overshadowed elements.
+    :param plateau: The plateau without the newly placed figure
+    :param new_plateau: The plateau with the newly placed figure
+    :param player: Number of player
+    :return: The fixed plateau
+    """
     elem = ("O" if player == 1 else "X")
     opp_elem = ("O" if player == 2 else "X")
     for i in range(len(plateau)):
         for j in range(len(plateau[0])):
             if plateau[i][j] == elem:
-                if new_plateau[i][j] == '@':
+                if new_plateau[i][j] == '.':
                     new_plateau[i] = new_plateau[i][:j] + elem + new_plateau[i][j+1:]
             elif plateau[i][j] == opp_elem:
-                if new_plateau[i][j] == '@':
+                if new_plateau[i][j] == '.':
                     new_plateau[i] = new_plateau[i][:j] + opp_elem + new_plateau[i][j + 1:]
     return new_plateau
 
+
+def dist(x1, y1, x2, y2):
+    """
+    >>> dist(1,1,3,3)
+    2.8284271247461903
+    Measure the distance between two points
+    :param x1: X coordinate of the opponent's figure
+    :param y1: Y coordinate of the opponent's figure
+    :param x2: X coordinate of the newly placed figure
+    :param y2: Y coordinate of the newly placed figure
+    :return: distance between two points
+    """
+    return ((int(x2)-int(x1))**2 + (int(y2)-int(y1))**2)**0.5
+
+
+def dominance(plateau, player, i, j):
+    """
+    Get as close as possible to the opponent.
+    Measures the distance from the newly placed figure
+    to the closest opponent's figure.
+    :param plateau: The plateau with the newly placed figure
+    :param i: X coordinate of the newly placed figure
+    :param player: Number of player
+    :param j: Y coordinate of the newly placed figure
+    :return: distance from the newly placed figure to the
+    closest opponent's figure.
+    """
+    distances = []
+    notmine = ("O" if player == 2 else "X")
+    for string in range(len(plateau)):
+        for elem in range(len(plateau[string])):
+            if plateau[string][elem] == notmine:
+                distances.append(dist(int(i), int(j), string, elem))
+    return min(distances)
+
+
 def check_available_moves(plateau: list, figure: list, player: int, heigth: int, width: int):
+    """
+    This function returns all of the possible ways to place a figure on a plateau
+    :param plateau: The current game plateau
+    :param figure: The figure we have to place
+    :param player: Number of player
+    :param heigth: Height of the plateau
+    :param width: Width of the plateau
+    :return: A list of possible moves and the number
+    of player's figures on the field
+    """
     # debug(plateau)
     # debug(figure)
-    oldfigs = 0
     opp_count = 0
     my_count = 0
     for i in range(len(plateau)):
         plateau[i] = plateau[i].replace('x', 'X').replace('o', 'O')
-        oldfigs += plateau[i].count('')
         opp_count += plateau[i].count("O" if player == 2 else "X")
         my_count += plateau[i].count("O" if player == 1 else "X")
-    figc = 0
-    for i in figure:
-        figure[figure.index(i)] = i.replace('.', '@')
-        figc += i.count('*')
     possible = []
     for i in range(1, heigth + 1 - len(figure)):
         for j in range(4, len(plateau[1]) - len(figure[0])):
@@ -121,30 +93,23 @@ def check_available_moves(plateau: list, figure: list, player: int, heigth: int,
             for f in range(len(figure)):
                 if i + f <= len(plateau) - 1:
                     newplateau[i+f] = newplateau[i+f][:j] + figure[f] + newplateau[i+f][j + len(figure[f]):]
-                # print(newplateau)
+            # print(newplateau)
             newplateau = givezero(plateau, newplateau, player)
-            newfigs = 0
             new_opp_count = 0
             new_my_count = 0
             for fig in newplateau:
-                newfigs += fig.count('.')
                 new_opp_count += fig.count("O" if player == 2 else "X")
                 new_my_count += fig.count("O" if player == 1 else "X")
             if new_opp_count == opp_count and new_my_count == my_count - 1:
                 # debug(newplateau)
-                possible.append(tuple((i - 1, j - 4)))
-    return possible, new_my_count
-
-# print(check_available_moves(['   01234567890123456,', '000 .................','001 .................', '002 .................','003 .................','004 .................','005 .................','006 .................','007 ..O..............','008 ..OOO............','009 .................','010 .................','011 .................','012 ..............X..','013 .................','014 .................]'], ['..*.','***.'],1, 15, 17))
-# print(check_available_moves(['    0123456789012345678901234567890123456789', '000 ........................................', '001 ........................................', '002 ........................................', '003 ...O....................................', '004 ........................................', '005 ........................................', '006 ........................................', '007 ........................................', '008 ........................................', '009 ........................................', '010 ........................................', '011 ........................................', '012 ........................................', '013 ........................................', '014 ........................................', '015 ........................................', '016 ........................................', '017 ........................................', '018 ........................................', '019 ...............................XX.......', '020 ...............................X........', '021 ........................................', '022 ........................................', '023 ........................................'], ['.*..', '....', '....'], 2, 23, 40))
+                distance = dominance(newplateau, player, i-1, j-4)
+                possible.append(tuple(((i - 1, j - 4), distance)))
+    return possible
 
 
 def parse_field_info():
     """
     Parse the info about the field.
-
-    However, the function doesn't do anything with it. Since the height of the field is
-    hard-coded later, this bot won't work with maps of different height.
 
     The input may look like this:
 
@@ -157,25 +122,9 @@ def parse_field_info():
     return height, width
 
 
-
-
 def parse_field(player: int, height, width):
     """
     Parse the field.
-
-    First of all, this function is also responsible for determining the next
-    move. Actually, this function should rather only parse the field, and return
-    it to another function, where the logic for choosing the move will be.
-
-    Also, the algorithm for choosing the right move is wrong. This function
-    finds the first position of _our_ character, and outputs it. However, it
-    doesn't guarantee that the figure will be connected to only one cell of our
-    territory. It can not be connected at all (for example, when the figure has
-    empty cells), or it can be connected with multiple cells of our territory.
-    That's definitely what you should address.
-
-    Also, it might be useful to distinguish between lowercase (the most recent piece)
-    and uppercase letters to determine where the enemy is moving etc.
 
     The input may look like this:
 
@@ -196,19 +145,12 @@ def parse_field(player: int, height, width):
     013 .................
     014 .................
 
-    :param player int: Represents whether we're the first or second player
+    :param player: Represents whether we're the first or second player
     """
-    # move = None
     plateau = []
     for i in range(height + 1):
         line = input()
         plateau.append(line)
-        # debug(f"Field: {l}")
-        # if move is None:
-        #     c = l.lower().find("o" if player == 1 else "x")
-        #     if c != -1:
-        #         move = i - 1, c - 4
-    # assert move is not None
     return plateau
 
 
@@ -216,9 +158,7 @@ def parse_figure():
     """
     Parse the figure.
 
-    The function parses the height of the figure (maybe the width would be
-    useful as well), and then reads it.
-    It would be nice to save it and return for further usage.
+    The function parses the height of the figure and then reads it.
 
     The input may look like this:
 
@@ -229,7 +169,6 @@ def parse_figure():
     l = input()
     debug(f"Piece: {l}")
     fig_height = int(l.split()[-2])
-    fig_width = int(l[:-1].split()[-1])
     figure = []
     for _ in range(fig_height):
         l = input()
@@ -238,42 +177,60 @@ def parse_figure():
     return figure
 
 
-def find_distance(plateau, figure, available_moves):
-    pass
+def floor(plateau, player):
+    """
+    Returns True if player should
+    be moving towards the floor of the
+    plateau and False otherwise
+    :param plateau: The current game field
+    :param player: Number of player
+    :return: True if player should move towards the floor else False
+    """
+    for i in range(1, 3):
+        if ("O" if player == 1 else "X") in plateau[-i]:
+            return False
+    return True
+
+
+def ceiling(plateau, player):
+    """Returns True if player should
+    be moving towards the ceiling of the
+    plateau and False otherwise
+    :param plateau: The current game field
+    :param player: Number of player
+    :return: True if player should move towards the top else False
+    """
+    for i in range(3):
+        if ("O" if player == 1 else "X") in plateau[i]:
+            return False
+    return True
 
 
 def step(player: int):
     """
     Perform one step of the game.
+    The strategy is simple:
+    1. If the top of the plateau isn't yet filled with out figures, we move towards it.
+    2. If the top is filled, we move towards the floor.
+    3. If the top and the floor is filled, which means we already cut off a piece
+    of the field from our opponent, we move as close to him as possible.
 
-    :param player int: Represents whether we're the first or second player
+    :param player: Represents whether we're the first or second player
     """
     height, width = parse_field_info()
     plateau = parse_field(player, int(height), int(width))
     figure = parse_figure()
-    available_moves, count = check_available_moves(plateau, figure, player, int(height), int(width))
+    available_moves = check_available_moves(plateau, figure, player, int(height), int(width))
     debug(available_moves)
-    # best_move = find_distance(plateau, figure, available_moves)
     if len(available_moves) == 0:
-        print(1, 1)
-        quit()
-    # elif len(available_moves) >= 2:
-    #     best_move = (available_moves[-(len(available_moves) - 3)])
-    # else:
-    #     best_move = available_moves[-1]
-    # best_move = random.choice(available_moves)
-    # best_move = available_moves[len(available_moves) // 2]
-    if player == 1:
-        if count > 80:
-            best_move = available_moves[0]
-        else:
-            best_move = available_moves[-1]
+        sys.exit()
+    if ceiling(plateau, player):
+        best_move = available_moves[0][0]
+    elif floor(plateau, player):
+        best_move = available_moves[-1][0]
     else:
-        if count > 80:
-            best_move = available_moves[-1]
-        else:
-            best_move = available_moves[0]
-    debug(best_move)
+        available_moves.sort(key=lambda x: x[1])
+        best_move = available_moves[0][0]
     return best_move
 
 
@@ -281,7 +238,7 @@ def play(player: int):
     """
     Main game loop.
 
-    :param player int: Represents whether we're the first or second player
+    :param player: Represents whether we're the first or second player
     """
     while True:
         move = step(player)
