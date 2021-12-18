@@ -18,6 +18,10 @@ def get_bot_filename(strategy_name: str) -> str:
     return f'{strategy_name}_bot.py'
 
 
+def get_winner() -> str:
+    pass
+
+
 def generate_bot(strategy_name: str) -> None:
     bot_template = ''
     with open('bots/bot_template.py') as fin:
@@ -40,6 +44,15 @@ def execute_game(map, p1, p2) -> None:
     )
 
 
+def execute_games(map, p1, p2, game_count) -> None:
+    print(f'>>> fighting : {p1} vs {p2}')
+    for game_id in range(game_count):
+        execute_game(map, p1, p2)
+        winner = get_winner()
+        print(f'> game #{game_id + 1} : {winner} won')
+    print('----------------\n')
+
+
 def select_judge_mode():
     print('select the judge mode:')
     print('[1] fight between two chosen strategies')
@@ -55,8 +68,32 @@ def select_judge_mode():
     raise ValueError(f'No judge mode: {mi}')
 
 
+def select_from_list(selection_list, select_what):
+    if len(selection_list) == 0:
+        raise ValueError(f'List of {select_what}s is empty')
+    print(f'Select the number of {select_what} from given list:')
+    for i, value in enumerate(selection_list):
+        print(f'[{i+1}] {value}')
+    uinput = int(input('Your selection:'))
+    if uinput not in range(1, len(selection_list) + 1):
+        raise ValueError(f'{select_what} with #{uinput} does not exist')
+    return selection_list[uinput - 1]
+
+
+def select_strategy(strategies):
+    return select_from_list(strategies, 'strategy')
+
+
+def select_map(maps):
+    return select_from_list(maps, 'map')
+
+
 def judge_chosen_two(strategies, maps) -> None:
-    pass
+    map = select_map(maps)
+    p1 = select_strategy(strategies)
+    p2 = select_strategy(strategies)
+    game_count = int(input('game count : '))
+    execute_games(map, p1, p2, game_count)
 
 
 def judge_chosen_one(strategies, maps) -> None:
