@@ -1,1 +1,8 @@
+__pycache__
+.vscode
+
+bots/*_bot.py
+
 filler.trace
+*.txt
+out*

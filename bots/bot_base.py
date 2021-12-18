@@ -1,12 +1,9 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
     This is an example of a bot for the 3rd project.
     ...a pretty bad bot to be honest -_-
 """
 import sys
 from logging import ERROR, debug, getLogger
-from strategies.dumbest_strategy import strategy
 
 getLogger().setLevel(ERROR)
 
@@ -187,7 +184,7 @@ def ceiling(plateau, player):
     return True
 
 
-def step(player: int):
+def step(player: int, strategy):
     """
     Perform one step of the game.
     The strategy is simple:
@@ -201,19 +198,20 @@ def step(player: int):
     height, width = parse_field_info()
     plateau = parse_field(player, int(height), int(width))
     figure = parse_figure()
-    available_moves = check_available_moves(plateau, figure, player, int(height), int(width))
+    available_moves = check_available_moves(
+        plateau, figure, player, int(height), int(width))
     best_move = strategy(plateau, available_moves, player)
     return best_move
 
 
-def play(player: int):
+def play(player: int, strategy):
     """
     Main game loop.
 
     :param player: Represents whether we're the first or second player
     """
     while True:
-        move = step(player)
+        move = step(player, strategy)
         print(*move)
 
 
@@ -230,13 +228,9 @@ def parse_info_about_player():
     return 1 if "p1 :" in i else 2
 
 
-def main():
+def main(strategy):
     player = parse_info_about_player()
     try:
-        play(player)
+        play(player, strategy)
     except EOFError:
         debug("Cannot get input. Seems that we've lost ):")
-
-
-if __name__ == "__main__":
-    main()
