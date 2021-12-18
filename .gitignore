@@ -3,3 +3,4 @@ __pycache__
 
 filler.trace
 *.txt
+out*
