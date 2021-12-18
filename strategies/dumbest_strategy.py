@@ -8,7 +8,7 @@ def floor(plateau, player):
     :return: True if player should move towards the floor else False
     """
     if ("O" if player == 1 else "X") in plateau[-1]:
-            return False
+        return False
     return True
 
 
@@ -26,7 +26,9 @@ def ceiling(plateau, player):
     return True
 
 
-def strategy(plateau, available_moves, player):
+def dumbest_strategy(plateau, available_moves, player):
+    if len(available_moves) == 0:
+        raise EOFError()
     if ceiling(plateau, player):
         best_move = available_moves[0][0]
     elif floor(plateau, player):
