@@ -1,2 +1,3 @@
 from strategies.dumbest_strategy import dumbest_strategy
 from strategies.random_strategy import random_strategy
+from strategies.first_strategy import first_strategy

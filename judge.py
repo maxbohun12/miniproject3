@@ -18,8 +18,12 @@ def get_bot_filename(strategy_name: str) -> str:
     return f'{strategy_name}_bot.py'
 
 
+# ? Can game be tied
 def get_winner() -> str:
-    pass
+    with open('filler.trace') as file:
+        for line in file:
+            if line.find('.py won') != -1:
+                return line[7:-12]
 
 
 def generate_bot(strategy_name: str) -> None:
@@ -97,11 +101,22 @@ def judge_chosen_two(strategies, maps) -> None:
 
 
 def judge_chosen_one(strategies, maps) -> None:
-    pass
+    map = select_map(maps)
+    p1 = select_strategy(strategies)
+    game_count = int(input('game count : '))
+    for strategy in strategies:
+        if strategy == p1:
+            continue
+        p2 = strategy
+        execute_games(map, p1, p2, game_count)
 
 
 def judge_everyone(strategies, maps) -> None:
-    pass
+    map = select_map(maps)
+    game_count = int(input('game count : '))
+    for i, p1 in enumerate(strategies):
+        for p2 in strategies[i + 1:]:
+            execute_games(map, p1, p2, game_count)
 
 
 def app():
