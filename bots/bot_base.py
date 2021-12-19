@@ -39,8 +39,18 @@ def dominance(plateau, player, i, j):
     for string in range(len(plateau)):
         for elem in range(len(plateau[string])):
             if plateau[string][elem] == notmine:
-                distances.append(dist(int(i), int(j), string, elem))
+                try:
+                    if plateau[string - 1][elem] == notmine \
+                            and plateau[string][elem - 1] == notmine\
+                            and plateau[string][elem + 1] == notmine\
+                            and plateau[string + 1][elem] == notmine:
+                        continue
+                    else:
+                        distances.append(dist(int(i), int(j), string, elem))
+                except:
+                    distances.append(dist(int(i), int(j), string, elem))
     return min(distances)
+
 
 
 def check_available_moves(plateau: list, figure: list, player: int, heigth: int, width: int):
